@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Processing System - Leader Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1f1f 50%, #3d1f1f 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #c62828 0%, #d32f2f 50%, #e53935 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header p {
+            opacity: 0.95;
+            font-size: 15px;
+            font-weight: 400;
+            margin-top: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 3px solid #e0e0e0;
+            padding: 0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: #c62828;
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
+        
+        .tab:hover {
+            background: #eeeeee;
+            color: #c62828;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #c62828;
+        }
+        
+        .tab.active::after {
+            width: 100%;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 28px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2c2c2c;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .required::after {
+            content: "*";
+            color: #c62828;
+            margin-left: 4px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border: 2px dashed #d0d0d0;
+            border-radius: 12px;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 80px;
+        }
+        
+        .file-input-label:hover {
+            border-color: #c62828;
+            background: #fff5f5;
+        }
+        
+        .file-input-label.has-file {
+            border-style: solid;
+            border-color: #c62828;
+            background: #ffebee;
+        }
+        
+        .file-input-label.has-file .file-icon {
+            color: #c62828;
+        }
+        
+        .file-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: #666;
+        }
+        
+        .file-text {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .file-text-placeholder {
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .file-text-name {
+            color: #c62828;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .file-text-error {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #c62828;
+            box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 12px;
+        }
+        
+        .radio-option {
+            flex: 1;
+            position: relative;
+        }
+        
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .radio-option label {
+            display: block;
+            padding: 16px 20px;
+            background: #f8f8f8;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .radio-option input[type="radio"]:checked + label {
+            background: #ffebee;
+            border-color: #c62828;
+            color: #c62828;
+            box-shadow: 0 4px 12px rgba(198, 40, 40, 0.2);
+        }
+        
+        .radio-option label:hover {
+            border-color: #c62828;
+            background: #fff5f5;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #c62828 0%, #d32f2f 50%, #e53935 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(198, 40, 40, 0.3);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(198, 40, 40, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .message {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+            animation: slideDown 0.4s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .message.success {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 2px solid #66bb6a;
+            color: #1b5e20;
+        }
+        
+        .message.error {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border: 2px solid #ef5350;
+            color: #b71c1c;
+        }
+        
+        .message.show {
+            display: block;
+        }
+        
+        .message-icon {
+            font-size: 18px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #ffebee;
+            border-top: 4px solid #c62828;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #666;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .download-link {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: #c62828;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+        }
+        
+        .download-link:hover {
+            background: #b71c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(198, 40, 40, 0.4);
+        }
+        
+        .download-icon {
+            margin-right: 8px;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left: 4px solid #ff6f00;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #e65100;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #bf360c;
+        }
+        
+        .filename-requirements {
+            background: #f8f9fa;
+            border-left: 4px solid #4285f4;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            color: #3c4043;
+        }
+        
+        .filename-requirements strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #1a73e8;
+        }
+        
+        .filename-requirements ul {
+            margin-left: 20px;
+            margin-top: 5px;
+        }
+        
+        .filename-requirements li {
+            margin-bottom: 4px;
+        }
+        
+        .validation-error {
+            color: #d32f2f;
+            font-size: 13px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+            }
+            
+            .tab {
+                padding: 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-calculator"></i> Payroll Processing System</h1>
+                <p>Leader Electronics (Philippine Branch) Incorporated</p>
+                <p style="font-size: 12px; opacity: 0.8; margin-top: 10px;">Modern web-based payroll processing and BDO conversion</p>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('payroll', event)">
+                <i class="fas fa-file-invoice-dollar"></i> Process Payroll
+            </button>
+            <button class="tab" onclick="showTab('bdo', event)">
+                <i class="fas fa-university"></i> BDO Conversion
+            </button>
+        </div>
+        
+        <div class="content">
+            <!-- Payroll Processing Tab -->
+            <div id="payroll-tab" class="tab-content active">
+                <div class="info-box">
+                    <strong><i class="fas fa-info-circle"></i> Instructions:</strong>
+                    Upload your payroll register and database files, select the month and cutoff period, then click Process Payroll.
+                </div>
+                
+                <div class="filename-requirements">
+                    <strong><i class="fas fa-file-excel"></i> File Name Requirements:</strong>
+                    <ul>
+                        <li><strong>Payroll Register File:</strong> Must be named <code>Payroll Register.xlsx</code></li>
+                        <li><strong>Database File:</strong> Must be named <code>DB Payroll.xlsx</code></li>
+                    </ul>
+                </div>
+                
+                <form id="payrollForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="payroll_file" class="required">
+                            <i class="fas fa-file-excel"></i> Payroll Register File (Excel)
+                        </label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="payroll_file" name="payroll_file" accept=".xlsx,.xls" required>
+                            <label for="payroll_file" class="file-input-label" id="payroll_file_label">
+                                <i class="fas fa-file-upload file-icon"></i>
+                                <div class="file-text">
+                                    <div class="file-text-placeholder">Click to upload Payroll Register.xlsx</div>
+                                    <div class="file-text-error" id="payroll_file_error" style="display: none;">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="validation-error" id="payroll_file_validation" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dbase_file" class="required">
+                            <i class="fas fa-database"></i> Database File (Excel)
+                        </label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="dbase_file" name="dbase_file" accept=".xlsx,.xls" required>
+                            <label for="dbase_file" class="file-input-label" id="dbase_file_label">
+                                <i class="fas fa-file-upload file-icon"></i>
+                                <div class="file-text">
+                                    <div class="file-text-placeholder">Click to upload DB Payroll.xlsx</div>
+                                    <div class="file-text-error" id="dbase_file_error" style="display: none;">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="validation-error" id="dbase_file_validation" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="month" class="required">
+                            <i class="fas fa-calendar-alt"></i> Select Month
+                        </label>
+                        <select id="month" name="month" required>
+                            <option value="">-- Select Month --</option>
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="required">
+                            <i class="fas fa-clock"></i> Cutoff Period
+                        </label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="first" name="cutoff" value="first" required>
+                                <label for="first">
+                                    <i class="fas fa-calendar-week"></i> 1st Cutoff<br>
+                                    <small style="font-size: 12px;">(26th - 10th)</small>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="second" name="cutoff" value="second" required>
+                                <label for="second">
+                                    <i class="fas fa-calendar-week"></i> 2nd Cutoff<br>
+                                    <small style="font-size: 12px;">(11th - 25th)</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="payrollSubmitBtn">
+                        <i class="fas fa-cogs"></i> Process Payroll
+                    </button>
+                    
+                    <div class="loading" id="payrollLoading">
+                        <div class="spinner"></div>
+                        <p class="loading-text">Processing payroll data...</p>
+                    </div>
+                    
+                    <div class="message" id="payrollMessage"></div>
+                </form>
+            </div>
+            
+            <!-- BDO Conversion Tab -->
+            <div id="bdo-tab" class="tab-content">
+                <div class="info-box">
+                    <strong><i class="fas fa-info-circle"></i> Instructions:</strong>
+                    Upload your payroll and database files to convert them to BDO bank format.
+                </div>
+                
+                <div class="filename-requirements">
+                    <strong><i class="fas fa-file-excel"></i> File Name Requirements:</strong>
+                    <ul>
+                        <li><strong>Payroll File:</strong> Must follow pattern: <code>Payroll_month_cutoffdate_year.xlsx</code><br>
+                            <small>Example: <code>Payroll_1230_2025.xlsx</code> (December 30, 2025)</small></li>
+                        <li><strong>Database File:</strong> Must be named <code>DB Payroll.xlsx</code></li>
+                    </ul>
+                </div>
+                
+                <form id="bdoForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="bdo_payroll_file" class="required">
+                            <i class="fas fa-file-excel"></i> Payroll File (Excel)
+                        </label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="bdo_payroll_file" name="payroll_file" accept=".xlsx,.xls" required>
+                            <label for="bdo_payroll_file" class="file-input-label" id="bdo_payroll_file_label">
+                                <i class="fas fa-file-upload file-icon"></i>
+                                <div class="file-text">
+                                    <div class="file-text-placeholder">Click to upload Payroll_MMDD_YYYY.xlsx</div>
+                                    <div class="file-text-error" id="bdo_payroll_file_error" style="display: none;">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="validation-error" id="bdo_payroll_file_validation" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bdo_dbase_file" class="required">
+                            <i class="fas fa-database"></i> Database File (Excel)
+                        </label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="bdo_dbase_file" name="dbase_file" accept=".xlsx,.xls" required>
+                            <label for="bdo_dbase_file" class="file-input-label" id="bdo_dbase_file_label">
+                                <i class="fas fa-file-upload file-icon"></i>
+                                <div class="file-text">
+                                    <div class="file-text-placeholder">Click to upload DB Payroll.xlsx</div>
+                                    <div class="file-text-error" id="bdo_dbase_file_error" style="display: none;">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span></span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="validation-error" id="bdo_dbase_file_validation" style="display: none;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span></span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="bdoSubmitBtn">
+                        <i class="fas fa-university"></i> Convert to BDO Format
+                    </button>
+                    
+                    <div class="loading" id="bdoLoading">
+                        <div class="spinner"></div>
+                        <p class="loading-text">Converting to BDO format...</p>
+                    </div>
+                    
+                    <div class="message" id="bdoMessage"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // File input handlers
+        function setupFileInput(inputId, labelId, errorId, validationId, expectedPattern = null, expectedName = null) {
+            const input = document.getElementById(inputId);
+            const label = document.getElementById(labelId);
+            const errorDisplay = document.getElementById(errorId);
+            const validationDisplay = document.getElementById(validationId);
+            
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                const fileText = label.querySelector('.file-text');
+                
+                if (file) {
+                    const fileName = file.name;
+                    fileText.innerHTML = `<div class="file-text-name"><i class="fas fa-check-circle"></i> ${fileName}</div>`;
+                    label.classList.add('has-file');
+                    
+                    // Validate filename
+                    let isValid = true;
+                    let errorMessage = '';
+                    
+                    if (expectedName && fileName !== expectedName) {
+                        isValid = false;
+                        errorMessage = `Filename must be: ${expectedName}`;
+                    } else if (expectedPattern && !expectedPattern.test(fileName)) {
+                        isValid = false;
+                        errorMessage = `Filename must match pattern: ${expectedPattern.toString().match(/\/(.*)\//)[1]}`;
+                    }
+                    
+                    if (!isValid) {
+                        errorDisplay.querySelector('span').textContent = errorMessage;
+                        errorDisplay.style.display = 'flex';
+                        validationDisplay.querySelector('span').textContent = errorMessage;
+                        validationDisplay.style.display = 'flex';
+                        label.classList.add('has-file');
+                        label.style.borderColor = '#d32f2f';
+                    } else {
+                        errorDisplay.style.display = 'none';
+                        validationDisplay.style.display = 'none';
+                        label.style.borderColor = '#c62828';
+                    }
+                } else {
+                    fileText.innerHTML = '<div class="file-text-placeholder">Click to upload or drag and drop</div>';
+                    label.classList.remove('has-file');
+                    errorDisplay.style.display = 'none';
+                    validationDisplay.style.display = 'none';
+                }
+            });
+        }
+        
+        // Setup file inputs with validation
+        setupFileInput('payroll_file', 'payroll_file_label', 'payroll_file_error', 'payroll_file_validation', 
+                      null, 'Payroll Register.xlsx');
+        
+        setupFileInput('dbase_file', 'dbase_file_label', 'dbase_file_error', 'dbase_file_validation', 
+                      null, 'DB Payroll.xlsx');
+        
+        // BDO payroll file pattern: Payroll_MMDD_YYYY.xlsx
+        const bdoPayrollPattern = /^Payroll_\d{4}_\d{4}\.xlsx$/i;
+        setupFileInput('bdo_payroll_file', 'bdo_payroll_file_label', 'bdo_payroll_file_error', 'bdo_payroll_file_validation', 
+                      bdoPayrollPattern, null);
+        
+        setupFileInput('bdo_dbase_file', 'bdo_dbase_file_label', 'bdo_dbase_file_error', 'bdo_dbase_file_validation', 
+                      null, 'DB Payroll.xlsx');
+        
+        // Drag and drop functionality
+        document.querySelectorAll('.file-input-label').forEach(label => {
+            label.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                label.style.borderColor = '#c62828';
+                label.style.background = '#fff5f5';
+            });
+            
+            label.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                if (!label.classList.contains('has-file')) {
+                    label.style.borderColor = '#d0d0d0';
+                    label.style.background = '#fafafa';
+                }
+            });
+            
+            label.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const input = label.parentElement.querySelector('input[type="file"]');
+                input.files = e.dataTransfer.files;
+                input.dispatchEvent(new Event('change'));
+            });
+        });
+        
+        function showTab(tabName, event) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            // Reset forms
+            document.querySelectorAll('.message').forEach(msg => {
+                msg.classList.remove('show');
+            });
+        }
+        
+        // Form validation before submission
+        function validateForm(formId) {
+            const form = document.getElementById(formId);
+            const inputs = form.querySelectorAll('input[type="file"]');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                const validationDisplay = document.getElementById(input.id + '_validation');
+                const file = input.files[0];
+                
+                if (!file) {
+                    validationDisplay.querySelector('span').textContent = 'This file is required';
+                    validationDisplay.style.display = 'flex';
+                    isValid = false;
+                } else if (validationDisplay.style.display === 'flex') {
+                    isValid = false;
+                }
+            });
+            
+            return isValid;
+        }
+        
+        // Payroll form submission
+        document.getElementById('payrollForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!validateForm('payrollForm')) {
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const loading = document.getElementById('payrollLoading');
+            const message = document.getElementById('payrollMessage');
+            const submitBtn = document.getElementById('payrollSubmitBtn');
+            
+            loading.classList.add('show');
+            message.classList.remove('show');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-cogs"></i> Process Payroll';
+                message.classList.add('show');
+                
+                if (response.ok) {
+                    message.className = 'message success show';
+                    message.innerHTML = `
+                        <i class="fas fa-check-circle message-icon"></i>
+                        <strong>${data.message}</strong>
+                        ${data.summary ? `
+                        <div style="margin-top: 10px; font-size: 14px;">
+                            <div><strong>Summary:</strong></div>
+                            <div>Employees: ${data.summary.total_employees || 'N/A'}</div>
+                            <div>Total Net Pay: ${data.summary.total_amount || 'N/A'}</div>
+                        </div>
+                        ` : ''}
+                        <br><br>
+                        <a href="${data.download_url}" class="download-link">
+                            <i class="fas fa-download download-icon"></i>
+                            Download Processed Payroll
+                        </a>
+                    `;
+                } else {
+                    message.className = 'message error show';
+                    message.innerHTML = `<i class="fas fa-times-circle message-icon"></i> ${data.error || 'An error occurred'}`;
+                }
+            } catch (error) {
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-cogs"></i> Process Payroll';
+                message.className = 'message error show';
+                message.innerHTML = `<i class="fas fa-times-circle message-icon"></i> Network error: ${error.message}`;
+            }
+        });
+        
+        // BDO form submission
+        document.getElementById('bdoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!validateForm('bdoForm')) {
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const loading = document.getElementById('bdoLoading');
+            const message = document.getElementById('bdoMessage');
+            const submitBtn = document.getElementById('bdoSubmitBtn');
+            
+            loading.classList.add('show');
+            message.classList.remove('show');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Converting...';
+            
+            try {
+                const response = await fetch('/convert_bdo', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-university"></i> Convert to BDO Format';
+                message.classList.add('show');
+                
+                if (response.ok) {
+                    message.className = 'message success show';
+                    message.innerHTML = `
+                        <i class="fas fa-check-circle message-icon"></i>
+                        <strong>${data.message}</strong>
+                        ${data.summary ? `
+                        <div style="margin-top: 10px; font-size: 14px;">
+                            <div><strong>Summary:</strong></div>
+                            <div>Bank Employees: ${data.summary.bank_employees}</div>
+                            <div>Cash Employees: ${data.summary.cash_employees}</div>
+                            <div>Bank Amount: ${data.summary.bank_amount}</div>
+                            <div>Cash Amount: ${data.summary.cash_amount}</div>
+                            <div><strong>Total: ${data.summary.total_amount}</strong></div>
+                        </div>
+                        ` : ''}
+                        <br><br>
+                        <a href="${data.download_url}" class="download-link">
+                            <i class="fas fa-download download-icon"></i>
+                            Download BDO File
+                        </a>
+                    `;
+                } else {
+                    message.className = 'message error show';
+                    message.innerHTML = `<i class="fas fa-times-circle message-icon"></i> ${data.error || 'An error occurred'}`;
+                }
+            } catch (error) {
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-university"></i> Convert to BDO Format';
+                message.className = 'message error show';
+                message.innerHTML = `<i class="fas fa-times-circle message-icon"></i> Network error: ${error.message}`;
+            }
+        });
+        
+        // Set current month as default
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentMonth = months[new Date().getMonth()];
+        document.getElementById('month').value = currentMonth;
+        
+        // Set default cutoff based on date
+        const today = new Date().getDate();
+        const cutoff = (today <= 10) ? 'first' : 'second';
+        document.getElementById(cutoff).checked = true;
+    </script>
+</body>
+</html>
