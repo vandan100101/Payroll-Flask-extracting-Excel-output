@@ -1212,6 +1212,7 @@ class FormattedExcelWriter:
         # Add summary sheets if database is available
         if self.dbase_df is not None:
             self.add_cost_center_summary()
+            self.add_cash_cost_center_summary()  # NEW: Add cash-only summary
             self.add_cash_payroll_list()
         
         # Save workbook
@@ -1223,13 +1224,13 @@ class FormattedExcelWriter:
         ws_summary = self.wb.create_sheet("Cost Center Summary")
         
         # Header
-        ws_summary.merge_cells('A1:AD1')
+        ws_summary.merge_cells('A1:AI1')
         ws_summary['A1'] = COMPANY_NAME
         ws_summary['A1'].font = Font(name='Arial', size=14, bold=True, color='C00000')
         ws_summary['A1'].alignment = Alignment(horizontal='center', vertical='center')
         ws_summary.row_dimensions[1].height = 25
         
-        ws_summary.merge_cells('A2:AD2')
+        ws_summary.merge_cells('A2:AI2')
         ws_summary['A2'] = "COST CENTER SUMMARY - DETAILED BREAKDOWN"
         ws_summary['A2'].font = Font(name='Arial', size=12, bold=True)
         ws_summary['A2'].alignment = Alignment(horizontal='center', vertical='center')
@@ -1243,7 +1244,7 @@ class FormattedExcelWriter:
             period_text = f"{self.month} 11 - 25"
             cutoff_text = f"{self.month} {month_info['days']}"
         
-        ws_summary.merge_cells('A3:AD3')
+        ws_summary.merge_cells('A3:AI3')
         ws_summary['A3'] = f"Period: {period_text}, {YEAR} | Cutoff: {cutoff_text}, {YEAR}"
         ws_summary['A3'].font = Font(name='Arial', size=10)
         ws_summary['A3'].alignment = Alignment(horizontal='center', vertical='center')
@@ -1300,7 +1301,7 @@ class FormattedExcelWriter:
                 top=Side(style='thin'), bottom=Side(style='thin')
             )
         
-        ws_summary.row_dimensions[5].height = 40  # Taller row for wrapped headers
+        ws_summary.row_dimensions[5].height = 40
         
         # Collect cost center data from main sheet
         ccr_summary = {}
@@ -1515,7 +1516,414 @@ class FormattedExcelWriter:
         ws_summary.page_setup.fitToWidth = 1
         ws_summary.page_setup.fitToHeight = 0
         ws_summary.print_title_rows = '1:5'  # Repeat headers
-
+    
+    def add_cash_cost_center_summary(self):
+        """Add Cost Center Summary sheet specifically for CASH payroll employees only"""
+        ws_cash_summary = self.wb.create_sheet("Cost Center Summary (CASH)")
+        
+        # Header
+        ws_cash_summary.merge_cells('A1:AI1')
+        ws_cash_summary['A1'] = COMPANY_NAME
+        ws_cash_summary['A1'].font = Font(name='Arial', size=14, bold=True, color='C00000')
+        ws_cash_summary['A1'].alignment = Alignment(horizontal='center', vertical='center')
+        ws_cash_summary.row_dimensions[1].height = 25
+        
+        ws_cash_summary.merge_cells('A2:AI2')
+        ws_cash_summary['A2'] = "COST CENTER SUMMARY - DETAILED BREAKDOWN (CASH PAYROLL ONLY)"
+        ws_cash_summary['A2'].font = Font(name='Arial', size=12, bold=True)
+        ws_cash_summary['A2'].alignment = Alignment(horizontal='center', vertical='center')
+        ws_cash_summary.row_dimensions[2].height = 22
+        
+        month_info = MONTH_CONFIG[self.month]
+        if self.cutoff == 'first':
+            period_text = f"{month_info['prev']} 26 - {self.month} 10"
+            cutoff_text = f"{self.month} 15"
+        else:
+            period_text = f"{self.month} 11 - 25"
+            cutoff_text = f"{self.month} {month_info['days']}"
+        
+        ws_cash_summary.merge_cells('A3:AI3')
+        ws_cash_summary['A3'] = f"Period: {period_text}, {YEAR} | Cutoff: {cutoff_text}, {YEAR}"
+        ws_cash_summary['A3'].font = Font(name='Arial', size=10)
+        ws_cash_summary['A3'].alignment = Alignment(horizontal='center', vertical='center')
+        
+        ws_cash_summary.row_dimensions[4].height = 15
+        
+        # Column headers - Same as regular summary but for cash employees only
+        headers = [
+            'CCR CODE',          # A
+            'Cost Center',       # B
+            'Cash Emp Count',    # C - Changed to Cash Emp Count
+            'Basic Salary',      # D
+            'OT A',              # E
+            'OT B',              # F
+            'OT C',              # G
+            'SIL',               # H
+            'Other Taxable Earnings',  # I
+            'Total Lates/UT',    # J
+            'Total Absences',    # K
+            'Other Deduct (Sal Adj)',  # L
+            'Total Deduct',      # M
+            'SSS EE',            # N
+            'PHEALTH EE',        # O
+            'PAG-IBIG EE',       # P
+            'TOT YEE Contri',    # Q
+            'Statutory MWE',     # R
+            'Taxable Compensation',  # S
+            'NT Other Earnings (13th Month)',  # T
+            'NT Other Earnings (Pos Allow)',  # U
+            'NT Other Earnings (SIL Conv)',  # V
+            'Other Non-Taxable Compensation',  # W
+            'Total Compensation',  # X
+            'Other Deduct (CoMat/Med Fee)',  # Y
+            'SSS Loan',          # Z
+            'Pag-ibig Loan',     # AA
+            'HMI Membership',    # AB
+            'Tax',               # AC
+            'Net Pay',           # AD
+            'SSS ER',            # AE
+            'ECC',               # AF
+            'PHEALTH ER',        # AG
+            'Pag-ibig ER',       # AH
+            '13TH_MONTH'         # AI
+        ]
+        
+        # Write headers with different color for cash summary
+        for col_idx, header in enumerate(headers, start=1):
+            cell = ws_cash_summary.cell(row=5, column=col_idx, value=header)
+            cell.font = Font(name='Arial', size=9, bold=True, color='FFFFFF')
+            cell.fill = PatternFill(start_color='FF9900', end_color='FF9900', fill_type='solid')  # Orange for cash
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            cell.border = Border(
+                left=Side(style='thin'), right=Side(style='thin'),
+                top=Side(style='thin'), bottom=Side(style='thin')
+            )
+        
+        ws_cash_summary.row_dimensions[5].height = 40
+        
+        # Create account lookup to identify cash employees
+        account_lookup = {}
+        if self.dbase_df is not None:
+            for idx, row in self.dbase_df.iterrows():
+                emp_id = str(row.iloc[0]).strip() if pd.notna(row.iloc[0]) else None
+                if emp_id and emp_id.replace('.', '').replace('-', '').isdigit():
+                    emp_id_clean = emp_id.split('.')[0]
+                    # Check column 3 for account number
+                    if len(row) > 3 and pd.notna(row.iloc[3]):
+                        acct_val = row.iloc[3]
+                        if isinstance(acct_val, (int, float)):
+                            account_no = str(int(acct_val)) if pd.notna(acct_val) else None
+                        else:
+                            account_no = str(acct_val) if pd.notna(acct_val) else None
+                        
+                        # Clean account number - keep only digits
+                        if account_no:
+                            account_clean = ''.join(filter(str.isdigit, account_no))
+                            if len(account_clean) >= 10:
+                                account_lookup[emp_id_clean] = account_clean
+                            else:
+                                account_lookup[emp_id_clean] = None  # Mark as cash employee
+                        else:
+                            account_lookup[emp_id_clean] = None  # Mark as cash employee
+                    else:
+                        account_lookup[emp_id_clean] = None  # Mark as cash employee
+        
+        # Collect cash payroll data by cost center
+        ccr_cash_summary = {}
+        
+        for idx, row in self.df.iterrows():
+            ccr_code = str(row.iloc[0]) if pd.notna(row.iloc[0]) else ''
+            emp_id = str(row.iloc[1]) if len(row) > 1 and pd.notna(row.iloc[1]) else ''
+            row_name = str(row.iloc[2]) if len(row) > 2 else ''
+            
+            # Skip total rows, grand total, and non-employee rows
+            if not ccr_code or 'TOTAL' in row_name or 'GRAND' in row_name:
+                continue
+            
+            # Skip if not a valid employee ID
+            if not emp_id.replace('.', '').replace('-', '').isdigit():
+                continue
+            
+            # Check if employee is cash payroll
+            emp_id_clean = emp_id.split('.')[0]
+            is_cash_employee = False
+            
+            if emp_id_clean in account_lookup:
+                has_account = account_lookup[emp_id_clean]
+                is_cash_employee = (has_account is None or has_account == '')
+            else:
+                # If not in database, assume cash employee
+                is_cash_employee = True
+            
+            if not is_cash_employee:
+                continue  # Skip bank employees
+            
+            # Map CCR code to name
+            ccr_name = CCR_CODE_MAPPING.get(ccr_code, ccr_code)
+            
+            # Initialize cost center if not exists
+            if ccr_name not in ccr_cash_summary:
+                ccr_cash_summary[ccr_name] = {
+                    'code': ccr_code,
+                    'cash_emp_count': 0,
+                    # Basic salary and earnings
+                    'basic': 0,
+                    'ot_a': 0,
+                    'ot_b': 0,
+                    'ot_c': 0,
+                    'sil': 0,
+                    'other_taxable': 0,
+                    # Deductions
+                    'total_lates': 0,
+                    'total_absences': 0,
+                    'other_deduct_sal': 0,
+                    'total_deduct': 0,
+                    # Employee contributions
+                    'sss_ee': 0,
+                    'phealth_ee': 0,
+                    'pagibig_ee': 0,
+                    'tot_yee_contri': 0,
+                    'statutory_mwe': 0,
+                    'taxable_comp': 0,
+                    # Non-taxable earnings
+                    'nt_13th': 0,
+                    'nt_pos_allow': 0,
+                    'nt_sil_conv': 0,
+                    'other_nt_comp': 0,
+                    'total_comp': 0,
+                    # Other deductions
+                    'other_deduct_comat': 0,
+                    'sss_loan': 0,
+                    'pagibig_loan': 0,
+                    'hmi_membership': 0,
+                    'tax': 0,
+                    'net_pay': 0,
+                    # Employer contributions
+                    'sss_er': 0,
+                    'ecc': 0,
+                    'phealth_er': 0,
+                    'pagibig_er': 0,
+                    '13th_month': 0
+                }
+            
+            # Add cash employee to count
+            ccr_cash_summary[ccr_name]['cash_emp_count'] += 1
+            
+            # Accumulate values from employee row
+            try:
+                # Basic salary and earnings
+                ccr_cash_summary[ccr_name]['basic'] += safe_float(row.iloc[7]) if len(row) > 7 else 0  # H
+                ccr_cash_summary[ccr_name]['ot_a'] += safe_float(row.iloc[8]) if len(row) > 8 else 0  # I
+                ccr_cash_summary[ccr_name]['ot_b'] += safe_float(row.iloc[9]) if len(row) > 9 else 0  # J
+                ccr_cash_summary[ccr_name]['ot_c'] += safe_float(row.iloc[10]) if len(row) > 10 else 0  # K
+                ccr_cash_summary[ccr_name]['sil'] += safe_float(row.iloc[11]) if len(row) > 11 else 0  # L
+                ccr_cash_summary[ccr_name]['other_taxable'] += safe_float(row.iloc[12]) if len(row) > 12 else 0  # M
+                # Deductions
+                ccr_cash_summary[ccr_name]['total_lates'] += safe_float(row.iloc[13]) if len(row) > 13 else 0  # N
+                ccr_cash_summary[ccr_name]['total_absences'] += safe_float(row.iloc[14]) if len(row) > 14 else 0  # O
+                ccr_cash_summary[ccr_name]['other_deduct_sal'] += safe_float(row.iloc[15]) if len(row) > 15 else 0  # P
+                ccr_cash_summary[ccr_name]['total_deduct'] += safe_float(row.iloc[16]) if len(row) > 16 else 0  # Q
+                # Employee contributions
+                ccr_cash_summary[ccr_name]['sss_ee'] += safe_float(row.iloc[17]) if len(row) > 17 else 0  # R
+                ccr_cash_summary[ccr_name]['phealth_ee'] += safe_float(row.iloc[18]) if len(row) > 18 else 0  # S
+                ccr_cash_summary[ccr_name]['pagibig_ee'] += safe_float(row.iloc[19]) if len(row) > 19 else 0  # T
+                ccr_cash_summary[ccr_name]['tot_yee_contri'] += safe_float(row.iloc[20]) if len(row) > 20 else 0  # U
+                ccr_cash_summary[ccr_name]['statutory_mwe'] += safe_float(row.iloc[21]) if len(row) > 21 else 0  # V
+                ccr_cash_summary[ccr_name]['taxable_comp'] += safe_float(row.iloc[22]) if len(row) > 22 else 0  # W
+                # Non-taxable earnings
+                ccr_cash_summary[ccr_name]['nt_13th'] += safe_float(row.iloc[23]) if len(row) > 23 else 0  # X
+                ccr_cash_summary[ccr_name]['nt_pos_allow'] += safe_float(row.iloc[24]) if len(row) > 24 else 0  # Y
+                ccr_cash_summary[ccr_name]['nt_sil_conv'] += safe_float(row.iloc[25]) if len(row) > 25 else 0  # Z
+                ccr_cash_summary[ccr_name]['other_nt_comp'] += safe_float(row.iloc[26]) if len(row) > 26 else 0  # AA
+                ccr_cash_summary[ccr_name]['total_comp'] += safe_float(row.iloc[27]) if len(row) > 27 else 0  # AB
+                # Other deductions
+                ccr_cash_summary[ccr_name]['other_deduct_comat'] += safe_float(row.iloc[28]) if len(row) > 28 else 0  # AC
+                ccr_cash_summary[ccr_name]['sss_loan'] += safe_float(row.iloc[29]) if len(row) > 29 else 0  # AD
+                ccr_cash_summary[ccr_name]['pagibig_loan'] += safe_float(row.iloc[30]) if len(row) > 30 else 0  # AE
+                ccr_cash_summary[ccr_name]['hmi_membership'] += safe_float(row.iloc[31]) if len(row) > 31 else 0  # AF
+                ccr_cash_summary[ccr_name]['tax'] += safe_float(row.iloc[32]) if len(row) > 32 else 0  # AG
+                ccr_cash_summary[ccr_name]['net_pay'] += safe_float(row.iloc[33]) if len(row) > 33 else 0  # AH
+                # Employer contributions
+                ccr_cash_summary[ccr_name]['sss_er'] += safe_float(row.iloc[34]) if len(row) > 34 else 0  # AI
+                ccr_cash_summary[ccr_name]['ecc'] += safe_float(row.iloc[35]) if len(row) > 35 else 0  # AJ
+                ccr_cash_summary[ccr_name]['phealth_er'] += safe_float(row.iloc[36]) if len(row) > 36 else 0  # AK
+                ccr_cash_summary[ccr_name]['pagibig_er'] += safe_float(row.iloc[37]) if len(row) > 37 else 0  # AL
+                ccr_cash_summary[ccr_name]['13th_month'] += safe_float(row.iloc[38]) if len(row) > 38 else 0  # AM
+            except Exception as e:
+                print(f"Error accumulating cash data for {ccr_name}: {e}")
+                continue
+        
+        # Write data in order
+        row_idx = 6
+        ccr_order = ['IND2001', 'IND2005', 'IND2101', 'IND2102', 'IND0202', 'IND0202-1', 
+                    'IND0203', 'IND0203-1', 'IND0204', 'IND0205', 'IND0503', 'IND0506',
+                    'IND0702', 'D2001', 'D2005', 'IND1002']
+        
+        total_cash_employees = 0
+        total_cash_net_pay = 0
+        
+        for ccr_name in ccr_order:
+            if ccr_name in ccr_cash_summary:
+                data = ccr_cash_summary[ccr_name]
+                
+                total_cash_employees += data['cash_emp_count']
+                total_cash_net_pay += data['net_pay']
+                
+                # Write all data columns
+                col_data = [
+                    data['code'],           # A - CCR CODE
+                    ccr_name,               # B - Cost Center
+                    data['cash_emp_count'], # C - Cash Emp Count
+                    data['basic'],          # D - Basic Salary
+                    data['ot_a'],           # E - OT A
+                    data['ot_b'],           # F - OT B
+                    data['ot_c'],           # G - OT C
+                    data['sil'],            # H - SIL
+                    data['other_taxable'],  # I - Other Taxable Earnings
+                    data['total_lates'],    # J - Total Lates/UT
+                    data['total_absences'], # K - Total Absences
+                    data['other_deduct_sal'], # L - Other Deduct (Sal Adj)
+                    data['total_deduct'],   # M - Total Deduct
+                    data['sss_ee'],         # N - SSS EE
+                    data['phealth_ee'],     # O - PHEALTH EE
+                    data['pagibig_ee'],     # P - PAG-IBIG EE
+                    data['tot_yee_contri'], # Q - TOT YEE Contri
+                    data['statutory_mwe'],  # R - Statutory MWE
+                    data['taxable_comp'],   # S - Taxable Compensation
+                    data['nt_13th'],        # T - NT Other Earnings (13th Month)
+                    data['nt_pos_allow'],   # U - NT Other Earnings (Pos Allow)
+                    data['nt_sil_conv'],    # V - NT Other Earnings (SIL Conv)
+                    data['other_nt_comp'],  # W - Other Non-Taxable Compensation
+                    data['total_comp'],     # X - Total Compensation
+                    data['other_deduct_comat'], # Y - Other Deduct (CoMat/Med Fee)
+                    data['sss_loan'],       # Z - SSS Loan
+                    data['pagibig_loan'],   # AA - Pag-ibig Loan
+                    data['hmi_membership'], # AB - HMI Membership
+                    data['tax'],            # AC - Tax
+                    data['net_pay'],        # AD - Net Pay
+                    data['sss_er'],         # AE - SSS ER
+                    data['ecc'],            # AF - ECC
+                    data['phealth_er'],     # AG - PHEALTH ER
+                    data['pagibig_er'],     # AH - Pag-ibig ER
+                    data['13th_month']      # AI - 13TH_MONTH
+                ]
+                
+                for col_idx, value in enumerate(col_data, start=1):
+                    cell = ws_cash_summary.cell(row=row_idx, column=col_idx, value=value)
+                    
+                    # Format based on column type
+                    if col_idx == 1:  # CCR CODE
+                        cell.font = Font(name='Arial', size=9, bold=True)
+                        cell.alignment = Alignment(horizontal='center')
+                    elif col_idx == 2:  # Cost Center
+                        cell.font = Font(name='Arial', size=9, bold=True)
+                    elif col_idx == 3:  # Cash Emp Count
+                        cell.alignment = Alignment(horizontal='center')
+                    elif col_idx >= 4:  # All numeric columns
+                        if value != 0:
+                            cell.number_format = '#,##0.00'
+                            cell.alignment = Alignment(horizontal='right')
+                    
+                    # Apply borders and alternating colors with orange tint
+                    fill_color = 'FFE6CC' if row_idx % 2 == 0 else 'FFF2E6'  # Light orange shades
+                    cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type='solid')
+                    cell.border = Border(
+                        left=Side(style='thin'), right=Side(style='thin'),
+                        top=Side(style='thin'), bottom=Side(style='thin')
+                    )
+                
+                ws_cash_summary.row_dimensions[row_idx].height = 20
+                row_idx += 1
+        
+        # Grand total row for cash payroll
+        total_start_row = 6
+        total_end_row = row_idx - 1
+        
+        if total_end_row >= total_start_row:  # Only add total if there's data
+            ws_cash_summary.cell(row=row_idx, column=1, value='').font = Font(name='Arial', size=10, bold=True)
+            ws_cash_summary.cell(row=row_idx, column=2, value='CASH PAYROLL TOTAL').font = Font(name='Arial', size=10, bold=True, color='C00000')
+            ws_cash_summary.cell(row=row_idx, column=3, value=f'=SUM(C{total_start_row}:C{total_end_row})')
+            
+            # Add formulas for all numeric columns
+            numeric_columns = list(range(4, len(headers) + 1))  # Columns D to AI
+            
+            for col_idx in numeric_columns:
+                if col_idx <= len(headers):
+                    col_letter = openpyxl.utils.get_column_letter(col_idx)
+                    formula = f'=SUM({col_letter}{total_start_row}:{col_letter}{total_end_row})'
+                    cell = ws_cash_summary.cell(row=row_idx, column=col_idx, value=formula)
+                    cell.font = Font(name='Arial', size=10, bold=True, color='C00000')
+                    cell.number_format = '#,##0.00'
+                    cell.alignment = Alignment(horizontal='right')
+                    cell.fill = PatternFill(start_color='FFCC99', end_color='FFCC99', fill_type='solid')  # Darker orange
+                    cell.border = Border(
+                        left=Side(style='medium'), right=Side(style='medium'),
+                        top=Side(style='double'), bottom=Side(style='double')
+                    )
+            
+            # Add summary note
+            summary_row = row_idx + 1
+            ws_cash_summary.merge_cells(f'A{summary_row}:AI{summary_row}')
+            ws_cash_summary.cell(row=summary_row, column=1, 
+                               value=f'Summary: {total_cash_employees} cash employees | Total Cash Payroll: ₱{total_cash_net_pay:,.2f}')
+            ws_cash_summary.cell(row=summary_row, column=1).font = Font(name='Arial', size=11, bold=True, color='FF9900')
+            ws_cash_summary.cell(row=summary_row, column=1).alignment = Alignment(horizontal='center', vertical='center')
+            ws_cash_summary.row_dimensions[summary_row].height = 25
+        
+        ws_cash_summary.row_dimensions[row_idx].height = 25
+        
+        # Set column widths
+        column_widths = {
+            'A': 8,   # CCR CODE
+            'B': 15,  # Cost Center
+            'C': 12,  # Cash Emp Count
+            'D': 12,  # Basic Salary
+            'E': 8,   # OT A
+            'F': 8,   # OT B
+            'G': 8,   # OT C
+            'H': 8,   # SIL
+            'I': 12,  # Other Taxable Earnings
+            'J': 12,  # Total Lates/UT
+            'K': 12,  # Total Absences
+            'L': 15,  # Other Deduct (Sal Adj)
+            'M': 12,  # Total Deduct
+            'N': 10,  # SSS EE
+            'O': 12,  # PHEALTH EE
+            'P': 12,  # PAG-IBIG EE
+            'Q': 12,  # TOT YEE Contri
+            'R': 12,  # Statutory MWE
+            'S': 15,  # Taxable Compensation
+            'T': 15,  # NT Other Earnings (13th Month)
+            'U': 15,  # NT Other Earnings (Pos Allow)
+            'V': 15,  # NT Other Earnings (SIL Conv)
+            'W': 18,  # Other Non-Taxable Compensation
+            'X': 12,  # Total Compensation
+            'Y': 18,  # Other Deduct (CoMat/Med Fee)
+            'Z': 10,  # SSS Loan
+            'AA': 12, # Pag-ibig Loan
+            'AB': 12, # HMI Membership
+            'AC': 10, # Tax
+            'AD': 12, # Net Pay
+            'AE': 10, # SSS ER
+            'AF': 10, # ECC
+            'AG': 12, # PHEALTH ER
+            'AH': 12, # Pag-ibig ER
+            'AI': 12  # 13TH_MONTH
+        }
+        
+        for col_letter, width in column_widths.items():
+            ws_cash_summary.column_dimensions[col_letter].width = width
+        
+        # Freeze panes (headers and first columns)
+        ws_cash_summary.freeze_panes = 'D6'
+        
+        # Add print settings
+        ws_cash_summary.page_setup.orientation = ws_cash_summary.ORIENTATION_LANDSCAPE
+        ws_cash_summary.page_setup.fitToWidth = 1
+        ws_cash_summary.page_setup.fitToHeight = 0
+        ws_cash_summary.print_title_rows = '1:5'  # Repeat headers
+        
+        print(f"✓ Created Cash Cost Center Summary: {total_cash_employees} cash employees, Total: ₱{total_cash_net_pay:,.2f}")
     
     def add_cash_payroll_list(self):
         """Add Cash Payroll List sheet for employees without bank accounts"""
